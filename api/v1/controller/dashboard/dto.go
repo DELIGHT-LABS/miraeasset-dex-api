@@ -64,8 +64,9 @@ type TokenRes struct {
 
 type TxsRes []TxRes
 type TxRes struct {
-	Action        string `json:"action"`
-	ActionDisplay string `json:"actionDisplay"`
+	Action          string `json:"action"`
+	ActionDisplay   string `json:"actionDisplay"`
+	ActionDisplayKo string `json:"actionDisplayKo"`
 
 	Address      string    `json:"address"`
 	Hash         string    `json:"hash"`
