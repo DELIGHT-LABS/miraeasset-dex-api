@@ -16,30 +16,7 @@ jobs:
       app_type: api
       path_exclude_prefix: indexer
     secrets:
-      DIMENSION_CONFIG: ${{ secrets.DIMENSION_CONFIG }}
-      CUBE_CONFIG: ${{ secrets.CUBE_CONFIG }}
-      FETCHHUB_CONFIG: ${{ secrets.FETCHHUB_CONFIG }}
-      DORADO_CONFIG: ${{ secrets.DORADO_CONFIG }}
-      # AWS
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-      AWS_ROLE_SESSION_NAME: dezswap-api-build
-      ECR_REPOSITORY: dezswap-api
-      # GCP
       GCP_GAR_REPOSITORY: ${{ vars.GCP_GAR_REPOSITORY }}
       GCP_REGION: ${{ vars.GCP_REGION }}
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GCP_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
-  
-  deploy:
-    uses: ./.github/workflows/deploy.yml
-    needs: publish
-    with:
-      app_type: api
-      image_tags: ${{ needs.publish.outputs.image-tags }}
-    secrets:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-      AWS_ROLE_SESSION_NAME: dezswap-api-deploy
-      ECR_REPOSITORY: dezswap-api
-      ECS_CLUSTER: dezswap-api
