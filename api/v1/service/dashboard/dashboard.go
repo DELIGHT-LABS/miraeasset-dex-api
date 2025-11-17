@@ -1085,9 +1085,11 @@ func (d *dashboard) Txs(txType TxType, addr ...Addr) (Txs, error) {
 		pt.sender AS sender,
 		pt.asset0 AS asset0,
 		t0.symbol AS asset0_symbol,
+		t0.name AS asset0_name,
 		pt.asset0_amount AS asset0_amount,
 		pt.asset1 AS asset1,
 		t1.symbol AS asset1_symbol,
+		t1.name AS asset1_name,
 		pt.asset1_amount AS asset1_amount,
 		COALESCE(
 			ABS(CASE WHEN pt.type = 'swap' OR pt.type = 'transfer' THEN
@@ -1136,9 +1138,11 @@ func (d *dashboard) TxsOfToken(txType TxType, tokenAddrs ...Addr) (Txs, error) {
 		pt.sender AS sender,
 		pt.asset0 AS asset0,
 		t0.symbol AS asset0_symbol,
+		t0.name AS asset0_name,
 		pt.asset0_amount AS asset0_amount,
 		pt.asset1 AS asset1,
 		t1.symbol AS asset1_symbol,
+		t1.name AS asset1_name,
 		pt.asset1_amount AS asset1_amount,
 		COALESCE(
 			ABS(CASE WHEN pt.type = 'swap' OR pt.type = 'transfer' THEN

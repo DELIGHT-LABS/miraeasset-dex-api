@@ -2,13 +2,23 @@ package dashboard
 
 import (
 	"fmt"
-	ds "github.com/dezswap/dezswap-api/api/v1/service/dashboard"
 	"strconv"
 	"strings"
 	"time"
 
+	ds "github.com/dezswap/dezswap-api/api/v1/service/dashboard"
+
 	"github.com/pkg/errors"
 )
+
+var txTypeKoMap = map[ds.TxType]string{
+	ds.TX_TYPE_SWAP:            "자산 전환",
+	ds.TX_TYPE_PROVIDE:         "유동성 공급",
+	ds.TX_TYPE_WITHDRAW:        "유동성 회수",
+	ds.TX_TYPE_TRANSFER:        "자산 송금",
+	ds.TX_TYPE_INITIAL_PROVIDE: "초기 유동성 공급",
+	ds.TX_TYPE_CREATE_PAIR:     "거래쌍 생성",
+}
 
 type mapper struct{}
 
@@ -69,20 +79,40 @@ func (m *mapper) txsToRes(txs ds.Txs) TxsRes {
 		return fmt.Sprintf("%s%s", strings.ToUpper(actionStr[0:1]), actionStr[1:])
 	}
 
+	assetConverter := func(name string) string {
+		if name == "원" {
+			return "원화"
+		}
+
+		return name
+	}
+
 	type asset struct {
 		Asset  string
 		Amount string
 		Symbol string
+		Name   string
 	}
 	type assets [2]asset
 
-	actionDisplayConverter := func(action ds.TxType, orderedAssets [2]asset) string {
+	actionDisplayConverter := func(action ds.TxType, orderedAssets [2]asset) (string, string) {
+		var ad, adKo string
+
+		tyTypeEn := actionConverter(string(action))
 		switch action {
 		case ds.TX_TYPE_SWAP:
-			return fmt.Sprintf("%s %s for %s", actionConverter(string(action)), orderedAssets[0].Symbol, orderedAssets[1].Symbol)
+			ad = fmt.Sprintf("%s %s for %s", tyTypeEn, orderedAssets[0].Symbol, orderedAssets[1].Symbol)
 		default:
-			return fmt.Sprintf("%s %s and %s", actionConverter(string(action)), orderedAssets[0].Symbol, orderedAssets[1].Symbol)
+			ad = fmt.Sprintf("%s %s and %s", tyTypeEn, orderedAssets[0].Symbol, orderedAssets[1].Symbol)
 		}
+
+		txTypeKo, ok := txTypeKoMap[action]
+		if !ok {
+			txTypeKo = tyTypeEn
+		}
+		adKo = fmt.Sprintf("%s-%s %s", assetConverter(orderedAssets[0].Name), assetConverter(orderedAssets[1].Name), txTypeKo)
+
+		return ad, adKo
 	}
 
 	orderAssets := func(action ds.TxType, unorderedAssets assets) assets {
@@ -98,22 +128,25 @@ func (m *mapper) txsToRes(txs ds.Txs) TxsRes {
 	res := make(TxsRes, len(txs))
 	for i, tx := range txs {
 		targetAssets := assets{
-			{Asset: tx.Asset0, Amount: tx.Asset0Amount, Symbol: tx.Asset0Symbol},
-			{Asset: tx.Asset1, Amount: tx.Asset1Amount, Symbol: tx.Asset1Symbol},
+			{Asset: tx.Asset0, Amount: tx.Asset0Amount, Symbol: tx.Asset0Symbol, Name: tx.Asset0Name},
+			{Asset: tx.Asset1, Amount: tx.Asset1Amount, Symbol: tx.Asset1Symbol, Name: tx.Asset1Name},
 		}
 		targetAssets = orderAssets(ds.TxType(tx.Action), targetAssets)
+		actionDisplay, actionDisplayKo := actionDisplayConverter(ds.TxType(tx.Action), targetAssets)
+
 		res[i] = TxRes{
-			Action:        m.serviceTxTypeToTxTypeString(tx.Action),
-			ActionDisplay: actionDisplayConverter(ds.TxType(tx.Action), targetAssets),
-			Hash:          tx.Hash,
-			Address:       tx.Address,
-			Asset0:        targetAssets[0].Asset,
-			Asset0Amount:  strings.ReplaceAll(targetAssets[0].Amount, "-", ""),
-			Asset1:        targetAssets[1].Asset,
-			Asset1Amount:  strings.ReplaceAll(targetAssets[1].Amount, "-", ""),
-			TotalValue:    tx.TotalValue,
-			Account:       tx.Sender,
-			Timestamp:     tx.Timestamp,
+			Action:          m.serviceTxTypeToTxTypeString(tx.Action),
+			ActionDisplay:   actionDisplay,
+			ActionDisplayKo: actionDisplayKo,
+			Hash:            tx.Hash,
+			Address:         tx.Address,
+			Asset0:          targetAssets[0].Asset,
+			Asset0Amount:    strings.ReplaceAll(targetAssets[0].Amount, "-", ""),
+			Asset1:          targetAssets[1].Asset,
+			Asset1Amount:    strings.ReplaceAll(targetAssets[1].Amount, "-", ""),
+			TotalValue:      tx.TotalValue,
+			Account:         tx.Sender,
+			Timestamp:       tx.Timestamp,
 		}
 	}
 	return res

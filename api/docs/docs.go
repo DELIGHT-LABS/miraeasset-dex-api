@@ -1670,6 +1670,9 @@ const docTemplate = `{
                 "actionDisplay": {
                     "type": "string"
                 },
+                "actionDisplayKo": {
+                    "type": "string"
+                },
                 "address": {
                     "type": "string"
                 },

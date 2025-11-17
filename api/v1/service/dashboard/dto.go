@@ -94,10 +94,13 @@ type TokenChart []TokenValue
 type TxType string
 
 const (
-	TX_TYPE_SWAP     TxType = "swap"
-	TX_TYPE_PROVIDE  TxType = "provide"
-	TX_TYPE_WITHDRAW TxType = "withdraw"
-	TX_TYPE_ALL      TxType = ""
+	TX_TYPE_SWAP            TxType = "swap"
+	TX_TYPE_PROVIDE         TxType = "provide"
+	TX_TYPE_WITHDRAW        TxType = "withdraw"
+	TX_TYPE_TRANSFER        TxType = "transfer"
+	TX_TYPE_INITIAL_PROVIDE TxType = "initial_provider"
+	TX_TYPE_CREATE_PAIR     TxType = "create_pair"
+	TX_TYPE_ALL             TxType = ""
 )
 
 type Txs []Tx
@@ -108,9 +111,11 @@ type Tx struct {
 	Address      string
 	Asset0       string
 	Asset0Symbol string
+	Asset0Name   string
 	Asset0Amount string
 	Asset1       string
 	Asset1Symbol string
+	Asset1Name   string
 	Asset1Amount string
 	TotalValue   string
 	Timestamp    time.Time
