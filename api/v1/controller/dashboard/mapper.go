@@ -79,14 +79,6 @@ func (m *mapper) txsToRes(txs ds.Txs) TxsRes {
 		return fmt.Sprintf("%s%s", strings.ToUpper(actionStr[0:1]), actionStr[1:])
 	}
 
-	assetConverter := func(name string) string {
-		if name == "원" {
-			return "원화"
-		}
-
-		return name
-	}
-
 	type asset struct {
 		Asset  string
 		Amount string
@@ -110,7 +102,7 @@ func (m *mapper) txsToRes(txs ds.Txs) TxsRes {
 		if !ok {
 			txTypeKo = tyTypeEn
 		}
-		adKo = fmt.Sprintf("%s-%s %s", assetConverter(orderedAssets[0].Name), assetConverter(orderedAssets[1].Name), txTypeKo)
+		adKo = fmt.Sprintf("%s-%s %s", orderedAssets[0].Name, orderedAssets[1].Name, txTypeKo)
 
 		return ad, adKo
 	}

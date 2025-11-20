@@ -58,7 +58,7 @@ func TestMapper_TxsToRes(t *testing.T) {
 	assert.Equal(t, "axpla", swap.Asset1)
 	assert.Equal(t, "100.01", swap.Asset1Amount)
 	assert.Equal(t, "Swap WON for XPLA", swap.ActionDisplay)
-	assert.Equal(t, "원화-XPLA 자산 전환", swap.ActionDisplayKo)
+	assert.Equal(t, "원-XPLA 자산 전환", swap.ActionDisplayKo)
 
 	// --- CASE 2: PROVIDE (Add liquidity) ---
 	provide := res[1]
