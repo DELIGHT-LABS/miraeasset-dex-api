@@ -33,15 +33,18 @@ func (r *memoryCacheImpl) Ping() error {
 
 func (c *memoryCacheImpl) Get(key string, dest interface{}) error {
 	c.RLock()
-	defer c.RUnlock()
-
 	item, found := c.store[key]
+	c.RUnlock()
+
 	if !found {
 		return cache.ErrCacheMiss
 	}
 
 	if item.ExpireAt != nil && time.Now().After(*item.ExpireAt) {
+		// delete needs exclusive lock
+		c.Lock()
 		delete(c.store, key)
+		c.Unlock()
 		return cache.ErrCacheMiss
 	}
 
