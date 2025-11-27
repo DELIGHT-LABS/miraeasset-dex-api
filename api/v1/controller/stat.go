@@ -2,13 +2,19 @@ package controller
 
 import (
 	"errors"
-	service2 "github.com/dezswap/dezswap-api/api/v1/service"
 	"net/http"
+	"time"
+
+	"github.com/chenyahui/gin-cache/persist"
+	service2 "github.com/dezswap/dezswap-api/api/v1/service"
+	"github.com/dezswap/dezswap-api/pkg"
 
 	"github.com/dezswap/dezswap-api/pkg/httputil"
 	"github.com/dezswap/dezswap-api/pkg/logging"
 	"github.com/gin-gonic/gin"
 )
+
+const statsCacheTTL = time.Minute
 
 type statController struct {
 	service2.Getter[service2.PairStats]
@@ -16,15 +22,15 @@ type statController struct {
 	statMapper
 }
 
-func InitStatController(s service2.Getter[service2.PairStats], route *gin.RouterGroup, logger logging.Logger) StatController {
+func InitStatController(s service2.Getter[service2.PairStats], route *gin.RouterGroup, cacheStore persist.CacheStore, logger logging.Logger) StatController {
 	c := statController{s, logger, statMapper{}}
-	c.register(route)
+	c.register(route, cacheStore)
 	return &c
 }
 
-func (c *statController) register(route *gin.RouterGroup) {
-	route.GET("/stats", c.Stats)
-	route.GET("/stats/:period", c.Stat)
+func (c *statController) register(route *gin.RouterGroup, cacheStore persist.CacheStore) {
+	route.GET("/stats", pkg.CacheWithoutCorsHeaders(cacheStore, statsCacheTTL), c.Stats)
+	route.GET("/stats/:period", pkg.CacheWithoutCorsHeaders(cacheStore, statsCacheTTL), c.Stat)
 }
 
 // Stats godoc
