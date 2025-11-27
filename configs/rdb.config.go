@@ -9,12 +9,16 @@ import (
 
 // db contains configs for other services
 type RdbConfig struct {
-	Host     string
-	Port     string
-	Database string
-	Username string
-	Password string
-	SSLMode  string
+	Host                   string
+	Port                   string
+	Database               string
+	Username               string
+	Password               string
+	SSLMode                string
+	MaxOpenConns           int
+	MaxIdleConns           int
+	ConnMaxLifetimeSeconds int
+	ConnMaxIdleSeconds     int
 }
 
 func (lhs *RdbConfig) Override(rhs RdbConfig) {
@@ -50,12 +54,16 @@ func rdbConfig(v *viper.Viper) RdbConfig {
 		}
 	}
 	return RdbConfig{
-		Host:     v.GetString("host"),
-		Port:     v.GetString("port"),
-		Database: v.GetString("database"),
-		Username: v.GetString("username"),
-		Password: v.GetString("password"),
-		SSLMode:  v.GetString("sslmode"),
+		Host:                   v.GetString("host"),
+		Port:                   v.GetString("port"),
+		Database:               v.GetString("database"),
+		Username:               v.GetString("username"),
+		Password:               v.GetString("password"),
+		SSLMode:                v.GetString("sslmode"),
+		MaxOpenConns:           v.GetInt("max_open_conns"),
+		MaxIdleConns:           v.GetInt("max_idle_conns"),
+		ConnMaxLifetimeSeconds: v.GetInt("conn_max_lifetime_seconds"),
+		ConnMaxIdleSeconds:     v.GetInt("conn_max_idle_seconds"),
 	}
 }
 
@@ -64,11 +72,15 @@ func rdbConfigFromEnv(v *viper.Viper, prefix string) RdbConfig {
 		return RdbConfig{}
 	}
 	return RdbConfig{
-		Host:     v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "host"))),
-		Port:     v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "port"))),
-		Database: v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "database"))),
-		Username: v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "username"))),
-		Password: v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "password"))),
-		SSLMode:  v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "sslmode"))),
+		Host:                   v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "host"))),
+		Port:                   v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "port"))),
+		Database:               v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "database"))),
+		Username:               v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "username"))),
+		Password:               v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "password"))),
+		SSLMode:                v.GetString(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "sslmode"))),
+		MaxOpenConns:           v.GetInt(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "max_open_conns"))),
+		MaxIdleConns:           v.GetInt(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "max_idle_conns"))),
+		ConnMaxLifetimeSeconds: v.GetInt(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "conn_max_lifetime_seconds"))),
+		ConnMaxIdleSeconds:     v.GetInt(strings.ToUpper(fmt.Sprintf("%s_%s", prefix, "conn_max_idle_seconds"))),
 	}
 }

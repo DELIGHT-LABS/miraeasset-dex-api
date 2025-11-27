@@ -49,7 +49,7 @@ func RegisterRoutes(rg *gin.RouterGroup, chainId string, version string, network
 	coinmarketcap.InitTickerController(coinMarketCapTickerService, r, logger)
 
 	dashboardService := ds.NewDashboardService(chainId, db)
-	dashboard.InitDashboardController(dashboardService, rg.Group("/dashboard"), logger)
+	dashboard.InitDashboardController(dashboardService, rg.Group("/dashboard"), cache, logger)
 
 	noticeService := ns.NewService(db)
 	notice.InitNoticeController(noticeService, rg.Group("/notices"), logger)
