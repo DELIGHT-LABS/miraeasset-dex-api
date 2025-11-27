@@ -3,9 +3,13 @@ package pkg
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"cosmossdk.io/math"
+	cache "github.com/chenyahui/gin-cache"
+	"github.com/chenyahui/gin-cache/persist"
 	"github.com/dezswap/dezswap-api/pkg/types"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
 
@@ -136,4 +140,8 @@ func truncateDecimal(input string) string {
 	}
 
 	return parts[0] + "." + fractional
+}
+
+func CacheWithoutCorsHeaders(cacheStore persist.CacheStore, ttl time.Duration) gin.HandlerFunc {
+	return cache.CacheByRequestURI(cacheStore, ttl, cache.WithDiscardHeaders(cache.CorsHeaders()))
 }

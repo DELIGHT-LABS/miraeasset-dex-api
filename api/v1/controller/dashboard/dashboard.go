@@ -1,10 +1,14 @@
 package dashboard
 
 import (
-	"github.com/dezswap/dezswap-api/api/v1/controller"
-	dashboard2 "github.com/dezswap/dezswap-api/api/v1/service/dashboard"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/chenyahui/gin-cache/persist"
+	"github.com/dezswap/dezswap-api/api/v1/controller"
+	dashboard2 "github.com/dezswap/dezswap-api/api/v1/service/dashboard"
+	"github.com/dezswap/dezswap-api/pkg"
 
 	"github.com/dezswap/dezswap-api/pkg/httputil"
 	"github.com/dezswap/dezswap-api/pkg/logging"
@@ -12,12 +16,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func InitDashboardController(s dashboard2.Dashboard, route *gin.RouterGroup, logger logging.Logger) controller.DashboardController {
+const chartCacheTTL = 30 * time.Minute
+
+func InitDashboardController(s dashboard2.Dashboard, route *gin.RouterGroup, cacheStore persist.CacheStore, logger logging.Logger) controller.DashboardController {
 	c := dashboardController{
 		s, logger, mapper{},
 	}
 	c.logger.Debug("InitDashboardController")
-	c.register(route)
+	c.register(route, cacheStore)
 	return &c
 }
 
@@ -27,11 +33,11 @@ type dashboardController struct {
 	mapper
 }
 
-func (c *dashboardController) register(route *gin.RouterGroup) {
+func (c *dashboardController) register(route *gin.RouterGroup, cacheStore persist.CacheStore) {
 
-	route.GET("/chart/:type", c.Chart)
-	route.GET("/chart/pools/:address/:type", c.ChartByPool)
-	route.GET("/chart/tokens/:address/:type", c.ChartByToken)
+	route.GET("/chart/:type", pkg.CacheWithoutCorsHeaders(cacheStore, chartCacheTTL), c.Chart)
+	route.GET("/chart/pools/:address/:type", pkg.CacheWithoutCorsHeaders(cacheStore, chartCacheTTL), c.ChartByPool)
+	route.GET("/chart/tokens/:address/:type", pkg.CacheWithoutCorsHeaders(cacheStore, chartCacheTTL), c.ChartByToken)
 
 	route.GET("/recent", c.Recent)
 
