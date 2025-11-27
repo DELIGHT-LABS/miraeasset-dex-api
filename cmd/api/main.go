@@ -31,14 +31,13 @@ func main() {
 }
 
 func dbCon(c configs.RdbConfig) *gorm.DB {
-
-    dbDsn := fmt.Sprintf(
-        "host=%s port=%s user=%s password=%s dbname=%s",
-        c.Host, c.Port, c.Username, c.Password, c.Database,
-    )
-    if c.SSLMode != "" {
-        dbDsn = fmt.Sprintf("%s sslmode=%s", dbDsn, c.SSLMode)
-    }
+	dbDsn := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s",
+		c.Host, c.Port, c.Username, c.Password, c.Database,
+	)
+	if c.SSLMode != "" {
+		dbDsn = fmt.Sprintf("%s sslmode=%s", dbDsn, c.SSLMode)
+	}
 	writer := io.MultiWriter(os.Stdout)
 	db, err := gorm.Open(postgres.Open(dbDsn), &gorm.Config{
 		NowFunc: func() time.Time {
@@ -57,6 +56,19 @@ func dbCon(c configs.RdbConfig) *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+
+	if c.MaxOpenConns > 0 && c.MaxIdleConns > 0 {
+		sqlDB, err := db.DB()
+		if err != nil {
+			panic(err)
+		}
+
+		sqlDB.SetMaxOpenConns(c.MaxOpenConns)
+		sqlDB.SetMaxIdleConns(c.MaxIdleConns)
+		sqlDB.SetConnMaxLifetime(time.Duration(c.ConnMaxLifetimeSeconds) * time.Second)
+		sqlDB.SetConnMaxIdleTime(time.Duration(c.ConnMaxIdleSeconds) * time.Second)
+	}
+
 	return db
 }
 
