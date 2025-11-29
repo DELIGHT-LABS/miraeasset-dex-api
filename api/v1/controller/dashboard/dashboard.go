@@ -17,6 +17,8 @@ import (
 )
 
 const chartCacheTTL = 30 * time.Minute
+const statsCacheTTL = 5 * time.Minute
+const defaultCacheTTL = time.Minute
 
 func InitDashboardController(s dashboard2.Dashboard, route *gin.RouterGroup, cacheStore persist.CacheStore, logger logging.Logger) controller.DashboardController {
 	c := dashboardController{
@@ -39,17 +41,16 @@ func (c *dashboardController) register(route *gin.RouterGroup, cacheStore persis
 	route.GET("/chart/pools/:address/:type", pkg.CacheWithoutCorsHeaders(cacheStore, chartCacheTTL), c.ChartByPool)
 	route.GET("/chart/tokens/:address/:type", pkg.CacheWithoutCorsHeaders(cacheStore, chartCacheTTL), c.ChartByToken)
 
-	route.GET("/recent", c.Recent)
+	route.GET("/recent", pkg.CacheWithoutCorsHeaders(cacheStore, statsCacheTTL), c.Recent)
+	route.GET("/statistics", pkg.CacheWithoutCorsHeaders(cacheStore, statsCacheTTL), c.Statistic)
 
-	route.GET("/statistics", c.Statistic)
-
-	route.GET("/tokens", c.Tokens)
-	route.GET("/tokens/:address", c.Token)
+	route.GET("/tokens", pkg.CacheWithoutCorsHeaders(cacheStore, defaultCacheTTL), c.Tokens)
+	route.GET("/tokens/:address", pkg.CacheWithoutCorsHeaders(cacheStore, defaultCacheTTL), c.Token)
 
 	route.GET("/txs", c.Txs)
 
-	route.GET("/pools", c.Pools)
-	route.GET("/pools/:address", c.Pool)
+	route.GET("/pools", pkg.CacheWithoutCorsHeaders(cacheStore, defaultCacheTTL), c.Pools)
+	route.GET("/pools/:address", pkg.CacheWithoutCorsHeaders(cacheStore, defaultCacheTTL), c.Pool)
 
 }
 

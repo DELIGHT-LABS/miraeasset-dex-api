@@ -33,7 +33,7 @@ func RegisterRoutes(rg *gin.RouterGroup, chainId string, version string, network
 	controller.InitPairController(pairService, rg, networkMetadata, logger)
 	controller.InitPoolController(poolService, rg, networkMetadata, logger)
 	controller.InitTokenController(tokenService, rg, logger)
-	controller.InitStatController(statService, rg, logger)
+	controller.InitStatController(statService, rg, cache, logger)
 
 	// CoinGecko endpoint
 	r := rg.Group("/coingecko")
